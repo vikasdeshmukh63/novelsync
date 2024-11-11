@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types';
-
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
@@ -141,14 +139,3 @@ export default function RolesTableRow({
     </>
   );
 }
-
-RolesTableRow.propTypes = {
-  onDeleteRow: PropTypes.func,
-  onSelectRow: PropTypes.func,
-  row: PropTypes.object,
-  selected: PropTypes.bool,
-  page: PropTypes.number,
-  rowsPerPage: PropTypes.number,
-  Status: PropTypes.any,
-  filters: PropTypes.object,
-};

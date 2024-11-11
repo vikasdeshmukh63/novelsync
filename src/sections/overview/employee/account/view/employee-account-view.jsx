@@ -9,6 +9,7 @@ import Container from '@mui/material/Container';
 import { paths } from 'src/routes/paths';
 
 import { _userAbout } from 'src/_mock';
+import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -19,7 +20,6 @@ import EmployeeAccountMediaLinks from '../employee-account-social-links';
 import EmployeeAccountProfessional from '../employee-account-professional';
 import EmployeeAccountNotifications from '../employee-account-notifications';
 import EmployeeAccountChangePassword from '../employee-account-change-password';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 

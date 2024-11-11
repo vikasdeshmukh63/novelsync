@@ -43,14 +43,15 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import RolesTableRow from '../roles-table-row';
-import RolesTableToolbar from '../roles-table-toolbar';
-import RolesQuickEditForm from '../roles-quick-edit-form';
-import RolesTableFiltersResult from '../roles-table-filters-result';
 import { toast } from 'sonner';
 import { Scrollbar } from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
+
+import RolesTableRow from '../roles-table-row';
+import RolesTableToolbar from '../roles-table-toolbar';
+import RolesQuickEditForm from '../roles-quick-edit-form';
+import RolesTableFiltersResult from '../roles-table-filters-result';
 
 // ----------------------------------------------------------------------
 

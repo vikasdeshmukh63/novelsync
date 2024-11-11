@@ -1,21 +1,20 @@
+import { Icon } from '@iconify/react';
+import { useRouter } from 'next/navigation';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
+import { LinearProgress } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 import { alpha, useTheme } from '@mui/material/styles';
 
-import { _socials } from 'src/_mock';
-
-import { LinearProgress } from '@mui/material';
-import { Icon } from '@iconify/react';
-import { useRouter } from 'next/navigation';
 import { useBoolean } from 'src/hooks/use-boolean';
-import { EmployeeViewDrawer } from './employee-view-drawer';
+
 import { Image } from 'src/components/image';
+
+import { EmployeeViewDrawer } from './employee-view-drawer';
 
 // ----------------------------------------------------------------------
 const renderText = (data, fallBackText) => {

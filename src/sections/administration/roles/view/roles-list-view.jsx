@@ -2,7 +2,7 @@
 
 import isEqual from 'lodash/isEqual';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -17,26 +17,23 @@ import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hooks';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { _roles } from 'src/_mock';
 import { CONSTANTS } from 'src/constants';
-import { DashboardContent } from 'src/layouts/dashboard';
+import { _roles, _userList } from 'src/_mock';
 import {
-  deleteIndustry,
-  fetchIndustrytList,
-  searchIndustryByQuery,
-  deleteIndustryByRowSelect,
-} from 'src/redux/slices/industry';
+  deleteRoles,
+  fetchRolesList,
+  deleteRolesByRowSelect,
+  searchRoleByQuery,
+} from 'src/redux/slices/roles';
 
 import { Label } from 'src/components/label';
-import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   TableNoData,
@@ -46,25 +43,22 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import IndustryTableRow from '../industries-table-row';
-import IndustryTableToolbar from '../industries-table-toolbar';
-import IndustryQuickEditForm from '../industries-quick-edit-form';
-import IndustryTableFiltersResult from '../industries-table-filters-result';
+import RolesTableRow from '../roles-table-row';
+import RolesTableToolbar from '../roles-table-toolbar';
+import RolesQuickEditForm from '../roles-quick-edit-form';
+import RolesTableFiltersResult from '../roles-table-filters-result';
+import { toast } from 'sonner';
+import { Scrollbar } from 'src/components/scrollbar';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
+
 // status options
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All', statusValue: undefined },
   { value: 'active', label: 'Active', statusValue: true },
   { value: 'inactive', label: 'Inactive', statusValue: false },
-];
-
-// tabel header options
-const TABLE_HEAD = [
-  { id: 'name', label: 'Name', width: 100 },
-  { id: 'description', label: 'Description', width: 180 },
-  { id: 'status', label: 'Status', width: 50 },
-  { id: '', width: 50 },
 ];
 
 // default values for filters
@@ -73,27 +67,36 @@ const defaultFilters = {
   name: '',
 };
 
+const TABLE_HEAD = [
+  { id: 'name', label: 'Name', width: 100 },
+  { id: 'description', label: 'Description', width: 180 },
+  { id: 'status', label: 'Status', width: 50 },
+  { id: '', width: 50 },
+];
+
 // ----------------------------------------------------------------------
 
-export default function IndustryListView() {
+export default function RolesListView() {
   // states
   const [isDeleted, setIsDeleted] = useState(false);
   const [filters, setFilters] = useState(defaultFilters);
 
-  // custom hooks
+  // custom  hooks
   const table = useTable();
   const openAdd = useBoolean();
-  const confirm = useBoolean();
   const settings = useSettingsContext();
-
-  // extracting data from redux
   const dispatch = useDispatch();
-  const { industries, itemCount, error } = useSelector((state) => state.industries);
+  const confirm = useBoolean();
+
+  // accessing roles from redux
+  const { roles, itemCount, error } = useSelector((state) => state.roles);
+
+  // to find status value
   const status = STATUS_OPTIONS?.find((ele) => ele.value === filters.status).statusValue;
 
   // to get the filtered data
   const dataFiltered = applyFilter({
-    inputData: industries,
+    inputData: roles,
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
@@ -123,28 +126,23 @@ export default function IndustryListView() {
 
   // function to delete single row
   const handleDeleteRow = async (id) => {
-    await dispatch(deleteIndustry(id));
+    await dispatch(deleteRoles(id));
     if (!filters.name) {
-      await dispatch(fetchIndustrytList(table.page + 1, table.rowsPerPage, status));
+      await dispatch(fetchRolesList(table.page + 1, table.rowsPerPage, status));
     } else if (filters.name && filters.name.length > 2) {
-      // debouncing and trottling to reduce number of api calls on searching
-      await dispatch(
-        searchIndustryByQuery(table.page + 1, table.rowsPerPage, filters.name, status)
-      );
+      await dispatch(searchRoleByQuery(table.page + 1, table.rowsPerPage, filters.name, status));
     }
     setIsDeleted(true);
   };
 
   // function to delete multiple rows
-  const handleDeleteMultipleRows = async () => {
-    await dispatch(deleteIndustryByRowSelect(table.selected));
+  const handleDeleteRows = async () => {
+    console.log(table.selected);
+    await dispatch(deleteRolesByRowSelect(table.selected));
     if (!filters.name) {
-      await dispatch(fetchIndustrytList(table.page + 1, table.rowsPerPage, status));
+      await dispatch(fetchRolesList(table.page + 1, table.rowsPerPage, status));
     } else if (filters.name && filters.name.length > 2) {
-      // debouncing and trottling to reduce number of api calls on searching
-      await dispatch(
-        searchIndustryByQuery(table.page + 1, table.rowsPerPage, filters.name, status)
-      );
+      await dispatch(searchRoleByQuery(table.page + 1, table.rowsPerPage, filters.name, status));
     }
     setIsDeleted(true);
     table.setSelected([]);
@@ -174,16 +172,13 @@ export default function IndustryListView() {
   useEffect(() => {
     let timer;
     if (!filters.name) {
-      dispatch(fetchIndustrytList(table.page + 1, table.rowsPerPage, status));
+      dispatch(fetchRolesList(table.page + 1, table.rowsPerPage, status));
     } else if (filters.name && filters.name.length > 2) {
       timer = setTimeout(() => {
-        // debouncing and trottling to reduce number of api calls on searching
-        dispatch(searchIndustryByQuery(table.page + 1, table.rowsPerPage, filters.name, status));
+        dispatch(searchRoleByQuery(table.page + 1, table.rowsPerPage, filters.name, status));
       }, 200);
     }
-    return () => {
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [dispatch, filters.name, status, table.page, table.rowsPerPage]);
 
   return (
@@ -191,22 +186,21 @@ export default function IndustryListView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         {/* add form  */}
         {openAdd.value && (
-          <IndustryQuickEditForm
+          <RolesQuickEditForm
+            filters={filters}
             Status={status}
             page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            filters={filters}
             type={CONSTANTS.CREATE}
+            rowsPerPage={table.rowsPerPage}
             open={openAdd.value}
             onClose={openAdd.onFalse}
           />
         )}
-
         <CustomBreadcrumbs
-          heading="Industries List"
+          heading="Roles List"
           links={[
-            { name: 'Management', href: paths.management.industries },
-            { name: 'industries', href: paths.management.industries },
+            { name: 'Administration', href: paths.administration.roles },
+            { name: 'Roles', href: paths.administration.roles },
             { name: 'List' },
           ]}
           action={
@@ -215,13 +209,14 @@ export default function IndustryListView() {
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New Industry
+              New Roles
             </Button>
           }
           sx={{
             mb: { xs: 3, md: 5 },
           }}
         />
+
         <Card>
           <Tabs
             value={filters.status}
@@ -254,20 +249,18 @@ export default function IndustryListView() {
               />
             ))}
           </Tabs>
-
           {/* table toolbar  */}
-          <IndustryTableToolbar
+          <RolesTableToolbar
+            Status={status}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
-            onFilters={handleFilters}
-            Status={status}
             filters={filters}
+            onFilters={handleFilters}
             roleOptions={_roles}
           />
-
           {/* reset buttons */}
           {canReset && (
-            <IndustryTableFiltersResult
+            <RolesTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
               //
@@ -318,18 +311,19 @@ export default function IndustryListView() {
                 <TableBody>
                   {/* table rows  */}
                   {dataFiltered?.map((row) => (
-                    <IndustryTableRow
+                    <RolesTableRow
+                      key={row.id_str}
                       filters={filters}
+                      row={row}
                       page={table.page}
                       rowsPerPage={table.rowsPerPage}
                       Status={status}
-                      key={row.id_str}
-                      row={row}
                       selected={table.selected.includes(row.id_str)}
                       onSelectRow={() => table.onSelectRow(row.id_str)}
                       onDeleteRow={() => handleDeleteRow(row.id_str)}
                     />
                   ))}
+
                   <TableNoData notFound={notFound} />
                 </TableBody>
               </Table>
@@ -342,7 +336,6 @@ export default function IndustryListView() {
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             onRowsPerPageChange={table.onChangeRowsPerPage}
-            dense={table.dense}
             // onChangeDense={table.onChangeDense}
           />
         </Card>
@@ -362,7 +355,7 @@ export default function IndustryListView() {
             variant="contained"
             color="error"
             onClick={() => {
-              handleDeleteMultipleRows();
+              handleDeleteRows();
               confirm.onFalse();
             }}
           >

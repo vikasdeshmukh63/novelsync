@@ -1,16 +1,16 @@
 'use client';
 
+import { Icon } from '@iconify/react';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Step, Stepper, StepLabel, Container, Button, Box } from '@mui/material';
+import { Box, Step, Button, Stepper, StepLabel, Container } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import { CreateNewUser } from './create-user';
-import { Icon } from '@iconify/react';
-import { useRouter } from 'next/navigation';
-import { AssignRoleToUser } from './assign-role';
 import CustomerSuccess from './success';
+import { CreateNewUser } from './create-user';
+import { AssignRoleToUser } from './assign-role';
 
 const steps = ['Create User', 'Role'];
 
@@ -68,7 +68,7 @@ const MainForm = () => {
 
           {activeStep === 1 && <AssignRoleToUser setActiveStep={setActiveStep} />}
 
-          {activeStep === 2 && <CustomerSuccess setActiveStep={setActiveStep}/>}
+          {activeStep === 2 && <CustomerSuccess setActiveStep={setActiveStep} />}
         </Box>
       </Container>
     </DashboardContent>

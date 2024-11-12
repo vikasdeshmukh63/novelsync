@@ -2,11 +2,11 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import { Card, Grid, Stack, Typography } from '@mui/material';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { getCandidateResume } from 'src/redux/slices/candidate';
+// import { getCandidateResume } from 'src/redux/slices/candidate';
 
 import EmptyContent from 'src/components/empty-content/empty-content';
 
@@ -29,14 +29,14 @@ export const CandidateProfessionalView = () => {
 
   // click handler for download resume
   const hadleDownloadCV = async () => {
-    await dispatch(
-      getCandidateResume(
-        { filename: candidateInterviewData?.CV },
-        {
-          userType: candidateInterviewData?.userType,
-        }
-      )
-    );
+    // await dispatch(
+    //   getCandidateResume(
+    //     { filename: candidateInterviewData?.CV },
+    //     {
+    //       userType: candidateInterviewData?.userType,
+    //     }
+    //   )
+    // );
     isSubmitted.onTrue();
   };
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import isEqual from 'lodash/isEqual';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
@@ -22,7 +23,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { CONSTANTS } from 'src/constants';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { deleteManyPermissions, fetchPermissions } from 'src/redux/slices/permissions';
+import { fetchPermissions, deleteManyPermissions } from 'src/redux/slices/permissions';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -39,9 +40,8 @@ import {
 } from 'src/components/table';
 
 import PermissionsTableRow from '../permission-table-row';
-import PermissionTableFiltersResult from '../permission-table-filters-result';
-import { toast } from 'sonner';
 import PermissionTableModal from '../permission-table-modal';
+import PermissionTableFiltersResult from '../permission-table-filters-result';
 
 // ----------------------------------------------------------------------
 

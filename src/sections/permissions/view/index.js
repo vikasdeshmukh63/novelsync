@@ -1,0 +1,1 @@
+export { default as PermissionsListView} from './permission-list-view'

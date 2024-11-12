@@ -6,6 +6,7 @@ const customers = createSlice({
   name: 'customers',
   initialState: {
     customers: [],
+    recruiterData: null,
     itemCount: 0,
     perPage: 0,
     pageCount: 0,
@@ -17,6 +18,10 @@ const customers = createSlice({
     // reducer to set customers data
     setCustomers: (state, action) => {
       state.customers = action.payload;
+    },
+    // reducer to add organization
+    setRecruitersData(state, action) {
+      state.recruiterData = action.payload;
     },
     // reducer to set pagination values
     setPagination(state, action) {
@@ -39,8 +44,14 @@ const customers = createSlice({
   },
 });
 
-export const { setCustomers, setItemCount, setPagination, hasError, setIsLoading } =
-  customers.actions;
+export const {
+  setCustomers,
+  setRecruitersData,
+  setItemCount,
+  setPagination,
+  hasError,
+  setIsLoading,
+} = customers.actions;
 
 export default customers.reducer;
 
@@ -162,6 +173,20 @@ export function deleteMultipleCustomers(ids) {
       }
     } catch (err) {
       dispatch(hasError(err));
+    }
+  };
+}
+
+// ! function to create customer
+export function createUser(payload) {
+  return async function createUserThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.post(endpoints.customers.create, payload);
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
     }
   };
 }

@@ -109,15 +109,20 @@ export const navData = [
         icon: ICONS.dashboard,
       },
       {
-        title: 'roles',
-        path: paths.administration.roles,
-        icon: ICONS.dashboard,
-      },
-      {
         title: 'orders',
         path: paths.administration.orders,
         icon: ICONS.dashboard,
       },
+      {
+        title: 'Roles',
+        path: paths.administration.roles,
+        icon: ICONS.dashboard,
+      },
+      {
+        title: 'Permissions',
+        path: paths.administration.permissions,
+        icon: ICONS.dashboard,
+      },
     ],
-  },
+  }
 ];

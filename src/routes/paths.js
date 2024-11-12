@@ -69,7 +69,8 @@ export const paths = {
   },
   administration: {
     users: `${ROOTS.ADMINISTRATION}/users`,
-    roles: `${ROOTS.ADMINISTRATION}/roles`,
     orders: `${ROOTS.ADMINISTRATION}/orders`,
-  },
+    roles: `${ROOTS.ADMINISTRATION}/roles`,
+    permissions: `${ROOTS.ADMINISTRATION}/permissions`,
+  }
 };

@@ -12,6 +12,7 @@ import industryReducer from '../slices/industry';
 import customerReducer from '../slices/customers';
 import locationReducer from '../slices/locations';
 import departmentReducer from '../slices/depatment';
+import permissionsReducer from '../slices/permissions';
 import proficiencyReducer from '../slices/proficiency';
 import organizationReducer from '../slices/organization';
 
@@ -44,6 +45,7 @@ const reducer = combineReducers({
   locations: locationReducer,
   departments: departmentReducer,
   roles: roleReducer,
+  permissions: permissionsReducer,
   company: companyReducer,
   invites: inviteReducer,
   signUp: signUpReducer,

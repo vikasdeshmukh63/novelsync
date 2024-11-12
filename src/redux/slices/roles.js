@@ -4,6 +4,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 const initialState = {
   roles: [],
+  rolePermissions: [],
   error: null,
   itemCount: 0,
   perPage: 0,
@@ -11,108 +12,58 @@ const initialState = {
   currentPage: 0,
 };
 
-const rolesSlice = createSlice({
+const roles = createSlice({
   name: 'roles',
   initialState,
   reducers: {
-    setRoles: (state, action) => {
+    // to set role data
+    setRoles(state, action) {
       state.roles = action.payload;
     },
-    hasError: (state, action) => {
-      state.error = action.payload;
+    // to set role permissions
+    setRolePermissions(state, action) {
+      state.rolePermissions = action.payload;
     },
+    // to set pagination
     setPagination(state, action) {
       state.itemCount = action.payload.paginator.itemCount;
       state.perPage = action.payload.paginator.perPage;
       state.pageCount = action.payload.paginator.pageCount;
       state.currentPage = action.payload.paginator.currentPage;
     },
-    setItemCount: (state, action) => {
-      state.itemCount = action.payload;
+    // to set error
+    hasError(state, action) {
+      state.error = action.payload;
     },
   },
 });
 
-export const { setRoles, hasError, setPagination, setItemCount } = rolesSlice.actions;
+export const { setRoles, setRolePermissions, setPagination, hasError } = roles.actions;
 
-export default rolesSlice.reducer;
+export default roles.reducer;
 
-// creating roles slice
-export function createRoles(payload) {
-  return async function createRolesThunk(dispatch) {
-    try {
-      const response = await axiosInstance.post(endpoints.roles.create, payload);
-      if (response.status === 200) {
-        dispatch(hasError(null));
-      }
-    } catch (error) {
-      dispatch(hasError(error));
-    }
-  };
-}
-
-// updating roles slice
-export function editRoles(id, payload) {
-  return async function editRolesThunk(dispatch) {
-    try {
-      const response = await axiosInstance.put(`${endpoints.roles.edit}/${id}`, payload);
-      if (response.status === 200) {
-        dispatch(hasError(null));
-      }
-    } catch (error) {
-      dispatch(hasError(error));
-    }
-  };
-}
-
-// creating roles slice
-export function deleteRoles(id) {
-  return async function deleteRolesThunk(dispatch) {
-    try {
-      const response = await axiosInstance.put(`${endpoints.roles.delete}/${id}`);
-      if (response.status === 200) {
-        dispatch(hasError(null));
-      }
-    } catch (error) {
-      dispatch(hasError(error));
-    }
-  };
-}
-
-// creating roles multiple select
-export function deleteRolesByRowSelect(ids) {
-  return async function deleteRolesByRowSelectThunk(dispatch) {
-    try {
-      const response = await axiosInstance.put(`${endpoints.roles.deleteMany}`, { ids });
-      if (response.status === 200) {
-        dispatch(hasError(null));
-      }
-    } catch (error) {
-      dispatch(hasError(error));
-    }
-  };
-}
-
-// to get Roles list
-
-export function fetchRolesList(page, rowsPerPage, isActive) {
+// ! function to fetch roles
+export function fetchRoles(page, rowsPerPage, status) {
+  page += 1;
   const payload = {
     query: {
+      isActive: status,
       isDeleted: false,
     },
     options: {
-      select: ['name', 'desc', 'isActive', 'createdAt', 'id_str'],
+      sort: {
+        createdAt: -1,
+      },
+      select: ['id', 'name', 'description', 'isActive', 'isDeleted', 'createdAt'],
       page,
       paginate: rowsPerPage,
     },
     isCountOnly: false,
   };
-  if (isActive !== undefined || isActive !== null) {
-    payload.query.isActive = isActive;
-  }
-  return async function fetchRolesListThunk(dispatch) {
+
+  return async function fetchRolesThunk(dispatch, getState) {
     try {
-      const response = await axiosInstance.post(endpoints.roles.list, payload);
+      const response = await axiosInstance.post(endpoints.userRoles.list, payload);
       if (response.status === 200) {
         dispatch(setRoles(response.data.data.data));
         dispatch(setPagination(response.data.data));
@@ -124,30 +75,139 @@ export function fetchRolesList(page, rowsPerPage, isActive) {
   };
 }
 
-export function searchRoleByQuery(page, rowsPerPage, name, filterValue) {
+// ! function to create roles
+export function createRole(payload) {
+  return async function createRolesThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.post(endpoints.userRoles.create, {
+        ...payload,
+        isActive: true,
+      });
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+// ! function to update roles
+export function updateRole(payload, id) {
+  return async function updateRolesThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.put(`${endpoints.userRoles.update}/${id}`, payload);
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+// ! function to delelte many roles
+export function deleteManyRoles(ids) {
+  return async function deleteManyRolesThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.put(endpoints.userRoles.deleteMany, { ids });
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+// ! function to delete single role
+export function deleteSingleRole(id) {
+  return async function deleteSingleRoleThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.put(`${endpoints.userRoles.delete}/${id}`);
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+// ! function to fetch role permissions
+export function fetchRolePermissionsForRole(id) {
+  const payload = {
+    query: {
+      role_id: id,
+    },
+    options: {
+      sort: {
+        createdAt: -1,
+      },
+      select: [],
+      page: 1,
+      paginate: 1000,
+    },
+    isCountOnly: false,
+  };
+  return async function fetchRolePermissionsForRoleThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.post(endpoints.userRoles.rolePermissions, payload);
+      if (response.status === 200) {
+        dispatch(setRolePermissions(response.data.data.data));
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+// ! function to set the role permissions
+export function setRolePermissionsForRole(payload, id) {
+  return async function setRolePermissionsForRoleThunk(dispatch, getState) {
+    try {
+      const response = await axiosInstance.post(
+        `${endpoints.userRoles.setRolePermissions}/${id}`,
+        payload
+      );
+      if (response.status === 200) {
+        dispatch(hasError(null));
+      }
+    } catch (error) {
+      dispatch(hasError(error));
+    }
+  };
+}
+
+export function searchRoles(page, rowsPerPage, name, isActive = true) {
   const payload = {
     query: {
       isDeleted: false,
+      isActive,
       name,
-      isActive: filterValue,
     },
     options: {
-      select: ['name', 'desc', 'isActive', 'createdAt', 'id_str'],
+      sort: {
+        createdAt: -1,
+      },
+      select: [],
+
       page,
       paginate: rowsPerPage,
     },
     isCountOnly: false,
   };
-  return async function searchRoleByQueryThunk(dispatch) {
+  return async function searchRolesThunk(dispatch, getState) {
     try {
-      const response = await axiosInstance.post(endpoints.roles.search, payload);
+      const response = await axiosInstance.post(endpoints.userRoles.search, payload);
       if (response.status === 200) {
-        dispatch(setRoles(response.data.data));
-        dispatch(setItemCount(0));
+        dispatch(setRoles(response.data.data ?? []));
+        dispatch(setPagination(response.data.data));
         dispatch(hasError(null));
       }
-    } catch (error) {
-      dispatch(hasError(error));
+    } catch (err) {
+      dispatch(hasError(err));
     }
   };
 }

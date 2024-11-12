@@ -9,15 +9,16 @@ import ListItemText from '@mui/material/ListItemText';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { renderText } from 'src/utils/helperFunctions';
+
 import { CONSTANTS } from 'src/constants';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import { CustomPopover, usePopover } from 'src/components/custom-popover';
+import { usePopover, CustomPopover } from 'src/components/custom-popover';
 
 import LocationQuickEditForm from './location-quick-edit-form';
-import { renderText } from 'src/utils/helperFunctions';
 
 // ----------------------------------------------------------------------
 

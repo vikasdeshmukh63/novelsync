@@ -2,22 +2,21 @@
 
 import { isEqual } from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-import { Box } from '@mui/system';
 import Button from '@mui/material/Button';
-import { Pagination, Typography } from '@mui/material';
 import Container from '@mui/material/Container';
+import { Box, Pagination, Typography } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
-import { _userCards } from 'src/_mock';
-import { fetchCustomersList, searchCustomersList, setCustomers } from 'src/redux/slices/customers';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { setCustomers, fetchCustomersList, searchCustomersList } from 'src/redux/slices/customers';
 
-import { Iconify } from 'src/components/iconify';
 import { useTable } from 'src/components/table';
+import { Iconify } from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
@@ -25,7 +24,6 @@ import AddEmployeesModal from '../AddEmployeesModal';
 import EmployeeCardList from '../employee-card-list';
 import EmployeeTableToolbar from '../employee-table-toolbar';
 import EmployeeTableFiltersResult from '../employee-table-filters-result';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 

@@ -20,27 +20,27 @@ import { paths } from 'src/routes/paths';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
+import { _roles } from 'src/_mock';
 import { CONSTANTS } from 'src/constants';
-import { _roles, _userList } from 'src/_mock';
+import { DashboardContent } from 'src/layouts/dashboard';
 import {
   deleteIndustry,
   fetchIndustrytList,
-  deleteIndustryByRowSelect,
   searchIndustryByQuery,
+  deleteIndustryByRowSelect,
 } from 'src/redux/slices/industry';
 
 import { Label } from 'src/components/label';
-import { Iconify } from 'src/components/iconify';
 import { toast } from 'src/components/snackbar';
+import { Iconify } from 'src/components/iconify';
+import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
-  emptyRows,
   TableNoData,
   getComparator,
-  TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom,
@@ -50,8 +50,6 @@ import IndustryTableRow from '../industries-table-row';
 import IndustryTableToolbar from '../industries-table-toolbar';
 import IndustryQuickEditForm from '../industries-quick-edit-form';
 import IndustryTableFiltersResult from '../industries-table-filters-result';
-import { Scrollbar } from 'src/components/scrollbar';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 // status options
@@ -189,193 +187,190 @@ export default function IndustryListView() {
   }, [dispatch, filters.name, status, table.page, table.rowsPerPage]);
 
   return (
-    <>
-      <DashboardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-          {/* add form  */}
-          {openAdd.value && (
-            <IndustryQuickEditForm
-              Status={status}
-              page={table.page}
-              rowsPerPage={table.rowsPerPage}
+    <DashboardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        {/* add form  */}
+        {openAdd.value && (
+          <IndustryQuickEditForm
+            Status={status}
+            page={table.page}
+            rowsPerPage={table.rowsPerPage}
+            filters={filters}
+            type={CONSTANTS.CREATE}
+            open={openAdd.value}
+            onClose={openAdd.onFalse}
+          />
+        )}
+
+        <CustomBreadcrumbs
+          heading="Industries List"
+          links={[
+            { name: 'Management', href: paths.management.industries },
+            { name: 'industries', href: paths.management.industries },
+            { name: 'List' },
+          ]}
+          action={
+            <Button
+              onClick={openAdd.onTrue}
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+            >
+              New Industry
+            </Button>
+          }
+          sx={{
+            mb: { xs: 3, md: 5 },
+          }}
+        />
+        <Card>
+          <Tabs
+            value={filters.status}
+            onChange={handleFilterStatus}
+            sx={{
+              px: 2.5,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            }}
+          >
+            {STATUS_OPTIONS.map((tab) => (
+              <Tab
+                key={tab.value}
+                iconPosition="end"
+                value={tab.value}
+                label={tab.label}
+                icon={
+                  <Label
+                    variant={
+                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
+                    }
+                    color={
+                      (tab.value === 'active' && 'success') ||
+                      (tab.value === 'inactive' && 'error') ||
+                      'default'
+                    }
+                  >
+                    {tab.value === filters.status ? dataFiltered?.length : 0}
+                  </Label>
+                }
+              />
+            ))}
+          </Tabs>
+
+          {/* table toolbar  */}
+          <IndustryTableToolbar
+            page={table.page}
+            rowsPerPage={table.rowsPerPage}
+            onFilters={handleFilters}
+            Status={status}
+            filters={filters}
+            roleOptions={_roles}
+          />
+
+          {/* reset buttons */}
+          {canReset && (
+            <IndustryTableFiltersResult
               filters={filters}
-              type={CONSTANTS.CREATE}
-              open={openAdd.value}
-              onClose={openAdd.onFalse}
+              onFilters={handleFilters}
+              //
+              onResetFilters={handleResetFilters}
+              //
+              results={dataFiltered?.length}
+              sx={{ p: 2.5, pt: 0 }}
             />
           )}
 
-          <CustomBreadcrumbs
-            heading="Industries List"
-            links={[
-              { name: 'Management', href: paths.management.industries },
-              { name: 'industries', href: paths.management.industries },
-              { name: 'List' },
-            ]}
-            action={
-              <Button
-                onClick={openAdd.onTrue}
-                variant="contained"
-                startIcon={<Iconify icon="mingcute:add-line" />}
-              >
-                New Industry
-              </Button>
-            }
-            sx={{
-              mb: { xs: 3, md: 5 },
-            }}
-          />
-          <Card>
-            <Tabs
-              value={filters.status}
-              onChange={handleFilterStatus}
-              sx={{
-                px: 2.5,
-                boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-              }}
-            >
-              {STATUS_OPTIONS.map((tab) => (
-                <Tab
-                  key={tab.value}
-                  iconPosition="end"
-                  value={tab.value}
-                  label={tab.label}
-                  icon={
-                    <Label
-                      variant={
-                        ((tab.value === 'all' || tab.value === filters.status) && 'filled') ||
-                        'soft'
-                      }
-                      color={
-                        (tab.value === 'active' && 'success') ||
-                        (tab.value === 'inactive' && 'error') ||
-                        'default'
-                      }
-                    >
-                      {tab.value === filters.status ? dataFiltered?.length : 0}
-                    </Label>
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            <TableSelectedAction
+              dense={table.dense}
+              numSelected={table.selected.length}
+              rowCount={dataFiltered?.length}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  dataFiltered?.map((row) => row.id_str)
+                )
+              }
+              action={
+                <Tooltip title="Delete">
+                  <IconButton color="primary" onClick={confirm.onTrue}>
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                  </IconButton>
+                </Tooltip>
+              }
+            />
+
+            <Scrollbar>
+              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                <TableHeadCustom
+                  order={table.order}
+                  orderBy={table.orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={dataFiltered?.length}
+                  numSelected={table.selected.length}
+                  onSort={table.onSort}
+                  onSelectAllRows={(checked) =>
+                    table.onSelectAllRows(
+                      checked,
+                      dataFiltered?.map((row) => row.id_str)
+                    )
                   }
                 />
-              ))}
-            </Tabs>
 
-            {/* table toolbar  */}
-            <IndustryTableToolbar
-              page={table.page}
-              rowsPerPage={table.rowsPerPage}
-              onFilters={handleFilters}
-              Status={status}
-              filters={filters}
-              roleOptions={_roles}
-            />
-
-            {/* reset buttons */}
-            {canReset && (
-              <IndustryTableFiltersResult
-                filters={filters}
-                onFilters={handleFilters}
-                //
-                onResetFilters={handleResetFilters}
-                //
-                results={dataFiltered?.length}
-                sx={{ p: 2.5, pt: 0 }}
-              />
-            )}
-
-            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-              <TableSelectedAction
-                dense={table.dense}
-                numSelected={table.selected.length}
-                rowCount={dataFiltered?.length}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    dataFiltered?.map((row) => row.id_str)
-                  )
-                }
-                action={
-                  <Tooltip title="Delete">
-                    <IconButton color="primary" onClick={confirm.onTrue}>
-                      <Iconify icon="solar:trash-bin-trash-bold" />
-                    </IconButton>
-                  </Tooltip>
-                }
-              />
-
-              <Scrollbar>
-                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                  <TableHeadCustom
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={dataFiltered?.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                      table.onSelectAllRows(
-                        checked,
-                        dataFiltered?.map((row) => row.id_str)
-                      )
-                    }
-                  />
-
-                  <TableBody>
-                    {/* table rows  */}
-                    {dataFiltered?.map((row) => (
-                      <IndustryTableRow
-                        filters={filters}
-                        page={table.page}
-                        rowsPerPage={table.rowsPerPage}
-                        Status={status}
-                        key={row.id_str}
-                        row={row}
-                        selected={table.selected.includes(row.id_str)}
-                        onSelectRow={() => table.onSelectRow(row.id_str)}
-                        onDeleteRow={() => handleDeleteRow(row.id_str)}
-                      />
-                    ))}
-                    <TableNoData notFound={notFound} />
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            </TableContainer>
-            {/* table pagination  */}
-            <TablePaginationCustom
-              count={itemCount}
-              page={table.page}
-              rowsPerPage={table.rowsPerPage}
-              onPageChange={table.onChangePage}
-              onRowsPerPageChange={table.onChangeRowsPerPage}
-              dense={table.dense}
-              // onChangeDense={table.onChangeDense}
-            />
-          </Card>
-        </Container>
-        {/* confirmation dialog box  */}
-        <ConfirmDialog
-          open={confirm.value}
-          onClose={confirm.onFalse}
-          title="Delete"
-          content={
-            <>
-              Are you sure want to delete <strong> {table.selected.length} </strong> items?
-            </>
-          }
-          action={
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                handleDeleteMultipleRows();
-                confirm.onFalse();
-              }}
-            >
-              Delete
-            </Button>
-          }
-        />
-      </DashboardContent>
-    </>
+                <TableBody>
+                  {/* table rows  */}
+                  {dataFiltered?.map((row) => (
+                    <IndustryTableRow
+                      filters={filters}
+                      page={table.page}
+                      rowsPerPage={table.rowsPerPage}
+                      Status={status}
+                      key={row.id_str}
+                      row={row}
+                      selected={table.selected.includes(row.id_str)}
+                      onSelectRow={() => table.onSelectRow(row.id_str)}
+                      onDeleteRow={() => handleDeleteRow(row.id_str)}
+                    />
+                  ))}
+                  <TableNoData notFound={notFound} />
+                </TableBody>
+              </Table>
+            </Scrollbar>
+          </TableContainer>
+          {/* table pagination  */}
+          <TablePaginationCustom
+            count={itemCount}
+            page={table.page}
+            rowsPerPage={table.rowsPerPage}
+            onPageChange={table.onChangePage}
+            onRowsPerPageChange={table.onChangeRowsPerPage}
+            dense={table.dense}
+            // onChangeDense={table.onChangeDense}
+          />
+        </Card>
+      </Container>
+      {/* confirmation dialog box  */}
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Delete"
+        content={
+          <>
+            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+          </>
+        }
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleDeleteMultipleRows();
+              confirm.onFalse();
+            }}
+          >
+            Delete
+          </Button>
+        }
+      />
+    </DashboardContent>
   );
 }
 

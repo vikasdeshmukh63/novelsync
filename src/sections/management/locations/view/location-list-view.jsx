@@ -24,6 +24,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { _roles } from 'src/_mock';
 import { CONSTANTS } from 'src/constants';
+import { DashboardContent } from 'src/layouts/dashboard';
 import {
   searchLocations,
   fetchLocationList,
@@ -33,6 +34,7 @@ import {
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -49,8 +51,6 @@ import LocationsTableRow from '../location-table-row';
 import LocationTableToolbar from '../location-table-toolbar';
 import LocationQuickEditForm from '../location-quick-edit-form';
 import LocationTableFiltersResult from '../location-table-filters-result';
-import { Scrollbar } from 'src/components/scrollbar';
-import { DashboardContent } from 'src/layouts/dashboard';
 
 // ----------------------------------------------------------------------
 
@@ -197,199 +197,196 @@ export default function LocationListView() {
   }, [table.page, table.rowsPerPage, status, dispatch, filters.name, selectedCompany?.id_str]);
 
   return (
-    <>
-      <DashboardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-          {/* edit form  */}
-          <LocationQuickEditForm
+    <DashboardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        {/* edit form  */}
+        <LocationQuickEditForm
+          filters={filters}
+          open={openAdd.value}
+          onClose={openAdd.onFalse}
+          type={CONSTANTS.CREATE}
+          page={table.page}
+          rowsPerPage={table.rowsPerPage}
+          Status={status}
+        />
+        <CustomBreadcrumbs
+          heading="Location List"
+          links={[
+            { name: 'Management', href: paths.management.locations },
+            { name: 'Locations', href: paths.management.locations },
+            { name: 'List' },
+          ]}
+          action={
+            <Button
+              onClick={openAdd.onTrue}
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+            >
+              New Location
+            </Button>
+          }
+          sx={{
+            mb: { xs: 3, md: 5 },
+          }}
+        />
+
+        <Card>
+          <Tabs
+            value={filters.status}
+            onChange={handleFilterStatus}
+            sx={{
+              px: 2.5,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            }}
+          >
+            {STATUS_OPTIONS.map((tab) => (
+              <Tab
+                key={tab.value}
+                iconPosition="end"
+                value={tab.value}
+                label={tab.label}
+                icon={
+                  <Label
+                    variant={
+                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
+                    }
+                    color={
+                      (tab.value === 'active' && 'success') ||
+                      (tab.value === 'inactive' && 'error') ||
+                      'default'
+                    }
+                  >
+                    {tab.value === filters.status ? dataFiltered?.length : 0}
+                  </Label>
+                }
+              />
+            ))}
+          </Tabs>
+
+          {/* table toolbar  */}
+          <LocationTableToolbar
             filters={filters}
-            open={openAdd.value}
-            onClose={openAdd.onFalse}
-            type={CONSTANTS.CREATE}
-            page={table.page}
+            onFilters={handleFilters}
+            roleOptions={_roles}
             rowsPerPage={table.rowsPerPage}
+            selectedCompany={selectedCompany}
+            setSelectedCompany={setSelectedCompany}
+            page={table.page}
             Status={status}
           />
-          <CustomBreadcrumbs
-            heading="Location List"
-            links={[
-              { name: 'Management', href: paths.management.locations },
-              { name: 'Locations', href: paths.management.locations },
-              { name: 'List' },
-            ]}
-            action={
-              <Button
-                onClick={openAdd.onTrue}
-                variant="contained"
-                startIcon={<Iconify icon="mingcute:add-line" />}
-              >
-                New Location
-              </Button>
-            }
-            sx={{
-              mb: { xs: 3, md: 5 },
-            }}
-          />
 
-          <Card>
-            <Tabs
-              value={filters.status}
-              onChange={handleFilterStatus}
-              sx={{
-                px: 2.5,
-                boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
-              }}
-            >
-              {STATUS_OPTIONS.map((tab) => (
-                <Tab
-                  key={tab.value}
-                  iconPosition="end"
-                  value={tab.value}
-                  label={tab.label}
-                  icon={
-                    <Label
-                      variant={
-                        ((tab.value === 'all' || tab.value === filters.status) && 'filled') ||
-                        'soft'
-                      }
-                      color={
-                        (tab.value === 'active' && 'success') ||
-                        (tab.value === 'inactive' && 'error') ||
-                        'default'
-                      }
-                    >
-                      {tab.value === filters.status ? dataFiltered?.length : 0}
-                    </Label>
-                  }
-                />
-              ))}
-            </Tabs>
-
-            {/* table toolbar  */}
-            <LocationTableToolbar
+          {/* reset buttons */}
+          {canReset && (
+            <LocationTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
-              roleOptions={_roles}
-              rowsPerPage={table.rowsPerPage}
-              selectedCompany={selectedCompany}
+              onResetFilters={handleResetFilters}
+              results={dataFiltered?.length}
+              handleClearAutoComplete={handleClearAutoComplete}
               setSelectedCompany={setSelectedCompany}
-              page={table.page}
-              Status={status}
+              sx={{ p: 2.5, pt: 0 }}
+            />
+          )}
+
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            <TableSelectedAction
+              dense={table.dense}
+              numSelected={table.selected.length}
+              rowCount={dataFiltered?.length}
+              onSelectAllRows={(checked) =>
+                table.onSelectAllRows(
+                  checked,
+                  dataFiltered.map((row) => row.id_str)
+                )
+              }
+              action={
+                <Tooltip title="Delete">
+                  <IconButton color="primary" onClick={confirm.onTrue}>
+                    <Iconify icon="solar:trash-bin-trash-bold" />
+                  </IconButton>
+                </Tooltip>
+              }
             />
 
-            {/* reset buttons */}
-            {canReset && (
-              <LocationTableFiltersResult
-                filters={filters}
-                onFilters={handleFilters}
-                onResetFilters={handleResetFilters}
-                results={dataFiltered?.length}
-                handleClearAutoComplete={handleClearAutoComplete}
-                setSelectedCompany={setSelectedCompany}
-                sx={{ p: 2.5, pt: 0 }}
-              />
-            )}
+            <Scrollbar>
+              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                <TableHeadCustom
+                  order={table.order}
+                  orderBy={table.orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={dataFiltered?.length}
+                  numSelected={table.selected.length}
+                  onSort={table.onSort}
+                  onSelectAllRows={(checked) =>
+                    table.onSelectAllRows(
+                      checked,
+                      dataFiltered.map((row) => row.id_str)
+                    )
+                  }
+                />
 
-            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-              <TableSelectedAction
-                dense={table.dense}
-                numSelected={table.selected.length}
-                rowCount={dataFiltered?.length}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    dataFiltered.map((row) => row.id_str)
-                  )
-                }
-                action={
-                  <Tooltip title="Delete">
-                    <IconButton color="primary" onClick={confirm.onTrue}>
-                      <Iconify icon="solar:trash-bin-trash-bold" />
-                    </IconButton>
-                  </Tooltip>
-                }
-              />
-
-              <Scrollbar>
-                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                  <TableHeadCustom
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    headLabel={TABLE_HEAD}
-                    rowCount={dataFiltered?.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                      table.onSelectAllRows(
-                        checked,
-                        dataFiltered.map((row) => row.id_str)
-                      )
-                    }
-                  />
-
-                  <TableBody>
-                    {/* table rows  */}
-                    {dataFiltered?.map((row) => (
-                      <LocationsTableRow
-                        key={row.id_str}
-                        row={row}
-                        selected={table.selected.includes(row.id_str)}
-                        onSelectRow={() => table.onSelectRow(row.id_str)}
-                        onDeleteRow={() => handleDeleteRow(row.id_str)}
-                        page={table.page}
-                        rowsPerPage={table.rowsPerPage}
-                        Status={status}
-                        filters={filters}
-                        selectedCompany={selectedCompany}
-                      />
-                    ))}
-                    {/* <TableEmptyRows
+                <TableBody>
+                  {/* table rows  */}
+                  {dataFiltered?.map((row) => (
+                    <LocationsTableRow
+                      key={row.id_str}
+                      row={row}
+                      selected={table.selected.includes(row.id_str)}
+                      onSelectRow={() => table.onSelectRow(row.id_str)}
+                      onDeleteRow={() => handleDeleteRow(row.id_str)}
+                      page={table.page}
+                      rowsPerPage={table.rowsPerPage}
+                      Status={status}
+                      filters={filters}
+                      selectedCompany={selectedCompany}
+                    />
+                  ))}
+                  {/* <TableEmptyRows
                     height={denseHeight}
                     emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                   /> */}
-                    <TableNoData notFound={notFound} />
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            </TableContainer>
+                  <TableNoData notFound={notFound} />
+                </TableBody>
+              </Table>
+            </Scrollbar>
+          </TableContainer>
 
-            {/* table pagination  */}
-            <TablePaginationCustom
-              count={itemCount}
-              page={table.page}
-              rowsPerPage={table.rowsPerPage}
-              onPageChange={table.onChangePage}
-              onRowsPerPageChange={table.onChangeRowsPerPage}
-              // onChangeDense={table.onChangeDense}
-            />
-          </Card>
-        </Container>
+          {/* table pagination  */}
+          <TablePaginationCustom
+            count={itemCount}
+            page={table.page}
+            rowsPerPage={table.rowsPerPage}
+            onPageChange={table.onChangePage}
+            onRowsPerPageChange={table.onChangeRowsPerPage}
+            // onChangeDense={table.onChangeDense}
+          />
+        </Card>
+      </Container>
 
-        {/* confirmation dialog box  */}
-        <ConfirmDialog
-          open={confirm.value}
-          onClose={confirm.onFalse}
-          title="Delete"
-          content={
-            <>
-              Are you sure want to delete <strong> {table.selected.length} </strong> items?
-            </>
-          }
-          action={
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                handleDeleteRows(table.selected);
-                confirm.onFalse();
-              }}
-            >
-              Delete
-            </Button>
-          }
-        />
-      </DashboardContent>
-    </>
+      {/* confirmation dialog box  */}
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Delete"
+        content={
+          <>
+            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+          </>
+        }
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleDeleteRows(table.selected);
+              confirm.onFalse();
+            }}
+          >
+            Delete
+          </Button>
+        }
+      />
+    </DashboardContent>
   );
 }
 

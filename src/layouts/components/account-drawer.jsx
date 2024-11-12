@@ -4,9 +4,7 @@ import { useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
 import Drawer from '@mui/material/Drawer';
-import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -15,7 +13,6 @@ import IconButton from '@mui/material/IconButton';
 import { paths } from 'src/routes/paths';
 import { useRouter, usePathname } from 'src/routes/hooks';
 
-import { _mock } from 'src/_mock';
 import { varAlpha } from 'src/theme/styles';
 
 import { Label } from 'src/components/label';
@@ -23,9 +20,8 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { AnimateAvatar } from 'src/components/animate';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
-import { UpgradeBlock } from './nav-upgrade';
 import { AccountButton } from './account-button';
 import { SignOutButton } from './sign-out-button';
 
@@ -38,7 +34,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
 
   const pathname = usePathname();
 
-  const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   const [open, setOpen] = useState(false);
 
@@ -62,7 +58,8 @@ export function AccountDrawer({ data = [], sx, ...other }) {
     <AnimateAvatar
       width={96}
       slotProps={{
-        avatar: { src: user?.photoURL, alt: user?.displayName },
+        avatar: { src: user?.photoURL, alt: user?.first_name },
+
         overlay: {
           border: 2,
           spacing: 3,
@@ -70,7 +67,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
         },
       }}
     >
-      {user?.displayName?.charAt(0).toUpperCase()}
+      {user?.first_name?.charAt(0).toUpperCase()}
     </AnimateAvatar>
   );
 
@@ -103,7 +100,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             {renderAvatar}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {user?.first_name}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
@@ -112,7 +109,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
           </Stack>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center" sx={{ p: 3 }}>
-            {[...Array(3)].map((_, index) => (
+            {/* {[...Array(3)].map((_, index) => (
               <Tooltip
                 key={_mock.fullName(index + 1)}
                 title={`Switch to: ${_mock.fullName(index + 1)}`}
@@ -123,9 +120,9 @@ export function AccountDrawer({ data = [], sx, ...other }) {
                   onClick={() => {}}
                 />
               </Tooltip>
-            ))}
+            ))} */}
 
-            <Tooltip title="Add account">
+            {/* <Tooltip title="Add account">
               <IconButton
                 sx={{
                   bgcolor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
@@ -134,7 +131,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
               >
                 <Iconify icon="mingcute:add-line" />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </Stack>
 
           <Stack
@@ -177,9 +174,7 @@ export function AccountDrawer({ data = [], sx, ...other }) {
             })}
           </Stack>
 
-          <Box sx={{ px: 2.5, py: 3 }}>
-            <UpgradeBlock />
-          </Box>
+          <Box sx={{ px: 2.5, py: 3 }}>{/* <UpgradeBlock /> */}</Box>
         </Scrollbar>
 
         <Box sx={{ p: 2.5 }}>

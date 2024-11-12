@@ -1,11 +1,13 @@
 'use client';
 
+import { useDispatch, useSelector } from 'react-redux';
 import { useMemo, useEffect, useCallback } from 'react';
 
 import { useSetState } from 'src/hooks/use-set-state';
 
 import axios, { endpoints } from 'src/utils/axios';
 
+import { fetchCountries } from 'src/redux/slices/general';
 import { dispatch as reduxDispatch } from 'src/redux/store/store';
 
 import { STORAGE_KEY } from './constant';
@@ -20,6 +22,10 @@ export function AuthProvider({ children }) {
     loading: true,
   });
 
+  const { countries } = useSelector((store) => store.general);
+
+  const dispatch = useDispatch();
+
   const checkUserSession = useCallback(async () => {
     try {
       const token = localStorage.getItem(STORAGE_KEY);
@@ -31,6 +37,8 @@ export function AuthProvider({ children }) {
 
         const user = res.data.data;
 
+        if (!countries.length) dispatch(fetchCountries());
+
         setState({ user: { ...user, token }, loading: false });
       } else {
         setState({ user: null, loading: false });
@@ -41,7 +49,7 @@ export function AuthProvider({ children }) {
       console.error(error);
       setState({ user: null, loading: false });
     }
-  }, [setState]);
+  }, [countries.length, dispatch, setState]);
 
   useEffect(() => {
     checkUserSession();

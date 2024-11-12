@@ -7,3 +7,9 @@ export const renderText = (value, fallbackText) => {
   }
   return fallbackText ? 'Not Available' : '';
 };
+
+// function to capitalize first letter of each word
+export const capitalizeFirstLetter = (string) => {
+  if (!string) return string;
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};

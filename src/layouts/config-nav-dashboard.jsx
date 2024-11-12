@@ -109,20 +109,26 @@ export const navData = [
         icon: ICONS.user,
       },
       {
-        title: 'orders',
-        path: paths.administration.orders,
-        icon: ICONS.dashboard,
-      },
-      {
-        title: 'Roles',
+        title: 'roles',
         path: paths.administration.roles,
         icon: ICONS.lock,
       },
+      {
+        title: 'permissions',
+        path: paths.administration.permissions,
+        icon: ICONS.menuItem,
+      },
+      {
+        title: 'create user',
+        path: paths.administration.createUser,
+        icon: ICONS.user,
+      },
+
       {
         title: 'orders',
         path: paths.administration.orders,
         icon: ICONS.order,
       },
     ],
-  }
+  },
 ];

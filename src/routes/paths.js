@@ -72,5 +72,6 @@ export const paths = {
     orders: `${ROOTS.ADMINISTRATION}/orders`,
     roles: `${ROOTS.ADMINISTRATION}/roles`,
     permissions: `${ROOTS.ADMINISTRATION}/permissions`,
+    createUser:`${ROOTS.ADMINISTRATION}/createuser`
   }
 };
